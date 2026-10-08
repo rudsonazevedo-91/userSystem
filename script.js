@@ -11,6 +11,44 @@ const buscarCep = document.querySelector("#buscarCep");
 const cep = document.querySelector("#cep");
 
 
+// Cria uma função responsável por exibir mensagens na tela.
+// O parâmetro "texto" recebe a mensagem que será exibida.
+// O parâmetro "tipo" define se a mensagem será de sucesso ou de erro.
+// Por padrão, o tipo será "sucesso".
+function mensagem(texto, tipo = "sucesso") {
+
+    // Cria uma notificação utilizando a biblioteca Toastify.
+    Toastify({
+
+        // Define o texto que será exibido na notificação.
+        text: texto,
+
+        // Define por quanto tempo a mensagem ficará visível.
+        // O valor é informado em milissegundos.
+        duration: 3000,
+
+        // Define a posição vertical da mensagem.
+        gravity: "top",
+
+        // Define a posição horizontal da mensagem.
+        position: "right",
+
+        // Define o estilo visual da mensagem.
+        style: {
+
+            // Verifica o tipo da mensagem.
+            // Se for "sucesso", utiliza a cor verde.
+            // Caso contrário, utiliza a cor vermelha.
+            background: tipo === "sucesso"
+                ? "#198754"
+                : "#dc3545"
+        }
+
+    // Exibe a notificação na tela.
+    }).showToast();
+}
+
+
 // Adiciona um evento ao formulário para detectar quando ele for enviado.
 // O evento utilizado é o "submit".
 form.addEventListener("submit", function (event) {
@@ -18,6 +56,7 @@ form.addEventListener("submit", function (event) {
     // Impede que o formulário seja enviado da maneira padrão.
     // Dessa forma, a página não é recarregada.
     event.preventDefault();
+
 
     // Exibe no console os dados preenchidos no formulário.
     console.log(Object.fromEntries(
@@ -30,13 +69,14 @@ form.addEventListener("submit", function (event) {
             .filter(element => element.id)
 
             // Cria pares no formato [id, valor].
-            // O ID do elemento será a chave e o valor digitado será o valor.
+            // O ID será a chave e o valor digitado será o valor.
             .map(element => [element.id, element.value])
 
         // Object.fromEntries transforma os pares [chave, valor]
         // em um objeto JavaScript.
         )
     );
+
 
     // Limpa todos os campos do formulário após o envio.
     form.reset();
@@ -58,8 +98,11 @@ buscarCep.addEventListener("click", async function () {
     // Verifica se o CEP possui exatamente 8 números.
     if (valor.length !== 8) {
 
-        // Exibe uma mensagem de alerta caso o CEP não possua 8 dígitos.
-        alert("CEP inválido. Por favor, digite um CEP com 8 dígitos.");
+        // Exibe uma mensagem de erro utilizando a função mensagem().
+        mensagem(
+            "CEP inválido. Por favor, digite um CEP com 8 dígitos.",
+            "erro"
+        );
 
         // Interrompe a execução da função.
         return;
@@ -73,7 +116,10 @@ buscarCep.addEventListener("click", async function () {
         // Utiliza o fetch para fazer uma requisição para a API ViaCEP.
         // O valor do CEP é colocado dentro da URL.
         // O "await" faz o código aguardar a resposta da API.
-        const resposta = await fetch(`https://viacep.com.br/ws/${valor}/json/`);
+        const resposta = await fetch(
+            `https://viacep.com.br/ws/${valor}/json/`
+        );
+
 
         // Converte a resposta recebida da API para o formato JSON.
         // O "await" aguarda a conversão dos dados.
@@ -85,7 +131,7 @@ buscarCep.addEventListener("click", async function () {
         if (!resposta.ok || dados.erro)
 
             // Cria um novo erro com a mensagem "CEP não encontrado."
-            throw new Error("CEP não encontrado.")
+            throw new Error("CEP não encontrado.");
 
 
         // Seleciona o campo que possui o ID "logradouro"
@@ -108,12 +154,17 @@ buscarCep.addEventListener("click", async function () {
         document.querySelector("#cidade").value = dados.localidade;
 
 
+        // Exibe uma mensagem informando que o CEP foi encontrado.
+        mensagem("CEP encontrado com sucesso!");
+
+
     // Caso aconteça algum erro dentro do bloco "try",
     // a execução passa para o bloco "catch".
     } catch (erro) {
 
-        // Exibe um alerta informando o erro capturado.
-        // "erro.mensage" acessa a mensagem do erro.
-        alert("Erro capturado: " + erro.mensage);
+        // Exibe a mensagem do erro utilizando a função mensagem().
+        // O segundo parâmetro "erro" faz a notificação aparecer em vermelho.
+        mensagem(erro.message, "erro");
     }
+
 });
