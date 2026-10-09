@@ -10,6 +10,8 @@ const buscarCep = document.querySelector("#buscarCep");
 // e armazena esse elemento na constante "cep".
 const cep = document.querySelector("#cep");
 
+const estado = document.querySelector("#estado");
+
 
 // Cria uma função responsável por exibir mensagens na tela.
 // O parâmetro "texto" recebe a mensagem que será exibida.
@@ -168,3 +170,22 @@ buscarCep.addEventListener("click", async function () {
     }
 
 });
+
+function adicionarOpçao(selecao, texto, valor) {
+    selecao.add(new Option(texto, valor));
+}
+
+async function carregarEstado() {
+    try {
+        const resposta = await fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome");
+        if (!resposta.ok) {
+            throw new Error("Não foi possivel carregar os estados")
+        }
+        const estados = await resposta.json();
+        estados.forEach(a => adicionarOpçao(estado, a.nome, a.sigla));
+    } catch (error) {
+        mensagem(error.message, "erro");
+    }
+}
+
+carregarEstado();
